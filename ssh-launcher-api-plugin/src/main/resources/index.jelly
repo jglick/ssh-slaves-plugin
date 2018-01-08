@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Provides infrastructure for launching agents via some implementation of SSH.
+</div>
