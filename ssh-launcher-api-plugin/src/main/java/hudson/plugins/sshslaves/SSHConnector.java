@@ -28,7 +28,6 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-import com.trilead.ssh2.Connection;
 import hudson.Extension;
 import hudson.model.ItemGroup;
 import hudson.model.TaskListener;
@@ -323,7 +322,7 @@ public class SSHConnector extends ComputerConnector {
                             context,
                             StandardUsernameCredentials.class,
                             Collections.<DomainRequirement>singletonList(SSHLauncher.SSH_SCHEME),
-                            SSHAuthenticator.matcher(Connection.class)
+                            SSHAuthenticator.matcher(/* TODO pass Connection.class or similar */)
                     )
                     .includeCurrentValue(credentialsId);
         }
@@ -337,7 +336,7 @@ public class SSHConnector extends ComputerConnector {
             }
             for (ListBoxModel.Option o : CredentialsProvider.listCredentials(StandardUsernameCredentials.class, context, ACL.SYSTEM,
                     Collections.<DomainRequirement>singletonList(SSHLauncher.SSH_SCHEME),
-                    SSHAuthenticator.matcher(Connection.class))) {
+                    SSHAuthenticator.matcher(/* TODO */))) {
                 if (StringUtils.equals(value, o.value)) {
                     return FormValidation.ok();
                 }

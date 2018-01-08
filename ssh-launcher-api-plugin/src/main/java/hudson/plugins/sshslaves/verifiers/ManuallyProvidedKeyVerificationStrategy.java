@@ -35,7 +35,6 @@ import org.kohsuke.stapler.QueryParameter;
 
 import hudson.Extension;
 import hudson.model.TaskListener;
-import hudson.plugins.sshslaves.Messages;
 import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.remoting.Base64;
 import hudson.slaves.SlaveComputer;

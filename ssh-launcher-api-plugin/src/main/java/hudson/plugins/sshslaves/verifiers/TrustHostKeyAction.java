@@ -34,7 +34,6 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import hudson.model.Computer;
 import hudson.model.TaskAction;
-import hudson.plugins.sshslaves.Messages;
 import hudson.security.ACL;
 import hudson.security.Permission;
 

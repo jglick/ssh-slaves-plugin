@@ -2,7 +2,6 @@ package hudson.plugins.sshslaves.verifiers;
 
 import com.trilead.ssh2.signature.DSASHA1Verify;
 import com.trilead.ssh2.signature.RSASHA1Verify;
-import hudson.plugins.sshslaves.Messages;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 

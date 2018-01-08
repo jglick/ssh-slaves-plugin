@@ -28,7 +28,6 @@ import hudson.model.Action;
 import hudson.model.Actionable;
 import hudson.model.Computer;
 import hudson.model.TaskListener;
-import hudson.plugins.sshslaves.Messages;
 import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.SlaveComputer;
 import java.io.IOException;

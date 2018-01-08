@@ -33,7 +33,6 @@ import com.trilead.ssh2.KnownHosts;
 
 import hudson.Extension;
 import hudson.model.TaskListener;
-import hudson.plugins.sshslaves.Messages;
 import hudson.plugins.sshslaves.SSHLauncher;
 import hudson.slaves.SlaveComputer;
 

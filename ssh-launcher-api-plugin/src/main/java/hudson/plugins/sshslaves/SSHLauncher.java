@@ -40,14 +40,6 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
 import com.cloudbees.plugins.credentials.domains.SchemeRequirement;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
-import com.trilead.ssh2.ChannelCondition;
-import com.trilead.ssh2.Connection;
-import com.trilead.ssh2.SCPClient;
-import com.trilead.ssh2.SFTPv3Client;
-import com.trilead.ssh2.SFTPv3FileAttributes;
-import com.trilead.ssh2.ServerHostKeyVerifier;
-import com.trilead.ssh2.Session;
-import com.trilead.ssh2.transport.TransportManager;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -1648,7 +1640,7 @@ public class SSHLauncher extends ComputerLauncher {
                                 Collections.<DomainRequirement>singletonList(
                                         new HostnamePortRequirement(host, portValue)
                                 ),
-                                SSHAuthenticator.matcher(Connection.class))
+                                SSHAuthenticator.matcher(/* TODO pass Connection.class or similar */))
                         .includeCurrentValue(credentialsId); // always add the current value last in case already present
             } catch (NumberFormatException ex) {
                 return new StandardUsernameListBoxModel()
@@ -1672,7 +1664,7 @@ public class SSHLauncher extends ComputerLauncher {
                                 Collections.<DomainRequirement>singletonList(
                                         new HostnamePortRequirement(host, portValue)
                                 ),
-                                SSHAuthenticator.matcher(Connection.class))) {
+                                SSHAuthenticator.matcher(/* TODO */))) {
                     if (StringUtils.equals(value, o.value)) {
                         return FormValidation.ok();
                     }
