@@ -52,6 +52,8 @@ import static hudson.Util.fixEmpty;
 import hudson.model.Computer;
 import hudson.security.AccessControlled;
 import io.jenkins.plugins.ssh_launcher_api.Messages;
+import io.jenkins.plugins.ssh_launcher_api.SSHConnectionFactory;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
@@ -74,6 +76,8 @@ public class SSHConnector extends ComputerConnector {
      * The id of the credentials to use.
      */
     private String credentialsId;
+
+    private SSHConnectionFactory connectionFactory;
 
     /**
      * Transient stash of the credentials to use, mostly just for providing floating user object.
@@ -176,6 +180,15 @@ public class SSHConnector extends ComputerConnector {
 
     public String getCredentialsId() {
         return credentialsId;
+    }
+
+    public SSHConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+
+    @DataBoundSetter
+    public void setConnectionFactory(SSHConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     /**

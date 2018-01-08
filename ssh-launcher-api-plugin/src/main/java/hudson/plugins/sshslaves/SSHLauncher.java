@@ -129,11 +129,13 @@ import static hudson.Util.*;
 import hudson.model.Computer;
 import hudson.security.AccessControlled;
 import hudson.util.VersionNumber;
+import io.jenkins.plugins.ssh_launcher_api.SSHConnectionFactory;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import static java.util.logging.Level.*;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * A computer launcher that tries to start a linux slave by opening an SSH connection and trying to find java.
@@ -187,6 +189,8 @@ public class SSHLauncher extends ComputerLauncher {
      * The id of the credentials to use.
      */
     private String credentialsId;
+
+    private SSHConnectionFactory connectionFactory;
 
     /**
      * Transient stash of the credentials to use, mostly just for providing floating user object.
@@ -563,6 +567,15 @@ public class SSHLauncher extends ComputerLauncher {
 
     public String getCredentialsId() {
         return credentialsId;
+    }
+
+    public SSHConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+
+    @DataBoundSetter
+    public void setConnectionFactory(SSHConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     @CheckForNull

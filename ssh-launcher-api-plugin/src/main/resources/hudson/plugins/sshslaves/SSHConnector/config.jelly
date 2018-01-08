@@ -7,6 +7,8 @@
 
   <f:dropdownDescriptorSelector title="${%Host Key Verification Strategy}" field="sshHostKeyVerificationStrategy" />
 
+  <f:dropdownDescriptorSelector title="${%SSH Connection Implementation}" field="connectionFactory"/> <!-- TODO hide if just one available -->
+
   <f:advanced>
       <f:entry title="${%Port}" field="port">
           <f:textbox default="22" />
