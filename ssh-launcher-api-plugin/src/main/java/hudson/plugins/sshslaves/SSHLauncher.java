@@ -72,6 +72,7 @@ import hudson.util.ListBoxModel;
 import hudson.util.NamingThreadFactory;
 import hudson.util.NullStream;
 import hudson.util.Secret;
+import io.jenkins.plugins.ssh_launcher_api.Messages;
 import java.util.Collections;
 import jenkins.model.Jenkins;
 import org.acegisecurity.context.SecurityContext;

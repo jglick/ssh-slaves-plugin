@@ -51,6 +51,7 @@ import java.io.IOException;
 import static hudson.Util.fixEmpty;
 import hudson.model.Computer;
 import hudson.security.AccessControlled;
+import io.jenkins.plugins.ssh_launcher_api.Messages;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
