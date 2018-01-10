@@ -28,20 +28,24 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import hudson.model.TaskListener;
 import hudson.plugins.sshslaves.verifiers.SshHostKeyVerificationStrategy;
 import hudson.slaves.SlaveComputer;
+import javax.annotation.Nonnull;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * @see SSHConnectionFactory#connect
  */
 public final class SSHConnectionDetails {
 
-    private final String host;
+    private final @Nonnull String host;
     private final int port;
-    private final StandardUsernameCredentials credentials;
-    private final SshHostKeyVerificationStrategy hostKeyVerificationStrategy;
-    private final SlaveComputer slave;
-    private final TaskListener listener;
+    private final @Nonnull StandardUsernameCredentials credentials;
+    private final @Nonnull SshHostKeyVerificationStrategy hostKeyVerificationStrategy;
+    private final @Nonnull SlaveComputer slave;
+    private final @Nonnull TaskListener listener;
 
-    SSHConnectionDetails(String host, int port, StandardUsernameCredentials credentials, SshHostKeyVerificationStrategy hostKeyVerificationStrategy, SlaveComputer slave, TaskListener listener) {
+    @Restricted(NoExternalUse.class)
+    public SSHConnectionDetails(@Nonnull String host, int port, @Nonnull StandardUsernameCredentials credentials, @Nonnull SshHostKeyVerificationStrategy hostKeyVerificationStrategy, @Nonnull SlaveComputer slave, @Nonnull TaskListener listener) {
         this.host = host;
         this.port = port;
         this.credentials = credentials;
@@ -50,7 +54,7 @@ public final class SSHConnectionDetails {
         this.listener = listener;
     }
 
-    public String getHost() {
+    public @Nonnull String getHost() {
         return host;
     }
 
@@ -58,19 +62,19 @@ public final class SSHConnectionDetails {
         return port;
     }
 
-    public StandardUsernameCredentials getCredentials() {
+    public @Nonnull StandardUsernameCredentials getCredentials() {
         return credentials;
     }
 
-    public SshHostKeyVerificationStrategy getHostKeyVerificationStrategy() {
+    public @Nonnull SshHostKeyVerificationStrategy getHostKeyVerificationStrategy() {
         return hostKeyVerificationStrategy;
     }
 
-    public SlaveComputer getSlave() {
+    public @Nonnull SlaveComputer getSlave() {
         return slave;
     }
     
-    public TaskListener getListener() {
+    public @Nonnull TaskListener getListener() {
         return listener;
     }
 
