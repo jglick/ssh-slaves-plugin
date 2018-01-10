@@ -121,12 +121,13 @@ import hudson.model.Computer;
 import hudson.security.AccessControlled;
 import hudson.util.VersionNumber;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnection;
-import io.jenkins.plugins.ssh_launcher_api.SSHConnectionDetails;
+import io.jenkins.plugins.ssh_launcher_api.SSHConnectionParameters;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnectionFactory;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.kohsuke.stapler.DataBoundSetter;
 
 /**
@@ -800,7 +801,7 @@ public class SSHLauncher extends ComputerLauncher {
         if (creds == null) {
             throw new AbortException("Cannot find SSH User credentials with id: " + credentialsId);
         }
-        connection = connectionFactory.connect(new SSHConnectionDetails(host, port, creds, getSshHostKeyVerificationStrategyDefaulted(), computer, listener));
+        connection = connectionFactory.connect(new SSHConnectionParameters(host, port, creds, getSshHostKeyVerificationStrategyDefaulted(), computer, listener, launchTimeoutSeconds));
         launcherExecutorService = Executors.newSingleThreadExecutor(
                 new NamingThreadFactory(Executors.defaultThreadFactory(), "SSHLauncher.launch for '" + computer.getName() + "' node"));
         Set<Callable<Boolean>> callables = new HashSet<Callable<Boolean>>();
@@ -988,9 +989,7 @@ public class SSHLauncher extends ComputerLauncher {
      */
     private void verifyNoHeaderJunk(TaskListener listener) throws IOException, InterruptedException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        /* TODO port
         connection.exec("true",baos);
-        */
         final String s;
         //TODO: Seems we need to retrieve the encoding from the connection destination
         try {
@@ -1015,10 +1014,8 @@ public class SSHLauncher extends ComputerLauncher {
      */
     private String attemptToInstallJDK(TaskListener listener, String workingDirectory) throws IOException, InterruptedException {
         ByteArrayOutputStream unameOutput = new ByteArrayOutputStream();
-        /* TODO port
         if (connection.exec("uname -a",new TeeOutputStream(unameOutput,listener.getLogger()))!=0)
             throw new IOException("Failed to run 'uname' to obtain the environment");
-        */
 
         // guess the platform from uname output. I don't use the specific options because I'm not sure
         // if various platforms have the consistent options
@@ -1058,8 +1055,10 @@ public class SSHLauncher extends ComputerLauncher {
 
         /* TODO port
         SFTPClient sftp = new SFTPClient(connection);
+        */
         // wipe out and recreate the Java directory
         connection.exec("rm -rf "+javaDir,listener.getLogger());
+        /* TODO port
         sftp.mkdirs(javaDir, 0755);
 
         URL bundle = getJDKInstaller().locate(listener, p, cpu);
@@ -1122,7 +1121,7 @@ public class SSHLauncher extends ComputerLauncher {
      * @throws IOException If something goes wrong.
      */
     private void copySlaveJar(TaskListener listener, String workingDirectory) throws IOException, InterruptedException {
-        String fileName = workingDirectory + "/slave.jar";
+        String fileName = workingDirectory + "/slave.jar"; // TODO move to SSHConnectionDetails
 
         /* TODO port
         listener.getLogger().println(Messages.SSHLauncher_StartingSFTPClient(getTimestamp()));
@@ -1221,9 +1220,7 @@ public class SSHLauncher extends ComputerLauncher {
 
     protected void reportEnvironment(TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println(Messages._SSHLauncher_RemoteUserEnvironment(getTimestamp()));
-        /* TODO port
         connection.exec("set",listener.getLogger());
-        */
     }
 
     @NonNull
@@ -1232,9 +1229,7 @@ public class SSHLauncher extends ComputerLauncher {
         StringWriter output = new StringWriter();   // record output from Java
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        /* TODO port
         connection.exec(javaCommand + " "+getJvmOptions() + " -version",out);
-        */
         //TODO: Seems we need to retrieve the encoding from the connection destination
         BufferedReader r = new BufferedReader(new InputStreamReader(
                 new ByteArrayInputStream(out.toByteArray()), Charset.defaultCharset()));

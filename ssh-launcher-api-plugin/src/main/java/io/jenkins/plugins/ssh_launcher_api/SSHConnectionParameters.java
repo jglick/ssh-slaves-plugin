@@ -28,6 +28,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import hudson.model.TaskListener;
 import hudson.plugins.sshslaves.verifiers.SshHostKeyVerificationStrategy;
 import hudson.slaves.SlaveComputer;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -35,7 +36,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 /**
  * @see SSHConnectionFactory#connect
  */
-public final class SSHConnectionDetails {
+public final class SSHConnectionParameters {
 
     private final @Nonnull String host;
     private final int port;
@@ -43,15 +44,17 @@ public final class SSHConnectionDetails {
     private final @Nonnull SshHostKeyVerificationStrategy hostKeyVerificationStrategy;
     private final @Nonnull SlaveComputer slave;
     private final @Nonnull TaskListener listener;
+    private final @CheckForNull Integer launchTimeoutSeconds;
 
     @Restricted(NoExternalUse.class)
-    public SSHConnectionDetails(@Nonnull String host, int port, @Nonnull StandardUsernameCredentials credentials, @Nonnull SshHostKeyVerificationStrategy hostKeyVerificationStrategy, @Nonnull SlaveComputer slave, @Nonnull TaskListener listener) {
+    public SSHConnectionParameters(@Nonnull String host, int port, @Nonnull StandardUsernameCredentials credentials, @Nonnull SshHostKeyVerificationStrategy hostKeyVerificationStrategy, @Nonnull SlaveComputer slave, @Nonnull TaskListener listener, @CheckForNull Integer launchTimeoutSeconds) {
         this.host = host;
         this.port = port;
         this.credentials = credentials;
         this.hostKeyVerificationStrategy = hostKeyVerificationStrategy;
         this.slave = slave;
         this.listener = listener;
+        this.launchTimeoutSeconds = launchTimeoutSeconds;
     }
 
     public @Nonnull String getHost() {
@@ -76,6 +79,10 @@ public final class SSHConnectionDetails {
     
     public @Nonnull TaskListener getListener() {
         return listener;
+    }
+
+    public @CheckForNull Integer getLaunchTimeoutSeconds() {
+        return launchTimeoutSeconds;
     }
 
 }

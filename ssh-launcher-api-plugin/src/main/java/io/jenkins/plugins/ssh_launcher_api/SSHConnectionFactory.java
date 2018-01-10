@@ -34,7 +34,7 @@ import jenkins.model.Jenkins;
  */
 public interface SSHConnectionFactory extends Describable<SSHConnectionFactory>, ExtensionPoint {
 
-    SSHConnection connect(SSHConnectionDetails details) throws IOException, InterruptedException;
+    SSHConnection connect(SSHConnectionParameters params) throws IOException, InterruptedException;
 
     @Override
     default SSHConnectionFactoryDescriptor getDescriptor() {

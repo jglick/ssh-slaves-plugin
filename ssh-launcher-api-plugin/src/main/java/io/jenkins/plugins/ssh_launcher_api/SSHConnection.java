@@ -25,13 +25,15 @@
 package io.jenkins.plugins.ssh_launcher_api;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * A single SSH connection to a remote host.
  */
 public interface SSHConnection extends Closeable {
 
-    // TODO run system command
+    int exec(String command, OutputStream output) throws IOException, InterruptedException;
 
     // TODO copy file
 

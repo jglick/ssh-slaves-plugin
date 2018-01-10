@@ -34,8 +34,9 @@ import hudson.model.TaskListener;
 import hudson.plugins.sshslaves.Messages;
 import hudson.plugins.sshslaves.PluginImpl;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnection;
-import io.jenkins.plugins.ssh_launcher_api.SSHConnectionDetails;
+import io.jenkins.plugins.ssh_launcher_api.SSHConnectionParameters;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -44,46 +45,50 @@ import java.util.concurrent.TimeoutException;
 
 class BIOConnection implements SSHConnection {
 
-    private final SSHConnectionDetails details;
+    private final SSHConnectionParameters params;
     private final Connection connection;
     private Session session;
 
-    BIOConnection(SSHConnectionDetails details) throws IOException, InterruptedException {
-        this.details = details;
-        connection = new Connection(details.getHost(), details.getPort());
-        String[] preferredKeyAlgorithms = details.getHostKeyVerificationStrategy().getPreferredKeyAlgorithms(details.getSlave());
+    BIOConnection(SSHConnectionParameters params) throws IOException, InterruptedException {
+        this.params = params;
+        connection = new Connection(params.getHost(), params.getPort());
+        String[] preferredKeyAlgorithms = params.getHostKeyVerificationStrategy().getPreferredKeyAlgorithms(params.getSlave());
         if (preferredKeyAlgorithms != null && preferredKeyAlgorithms.length > 0) { // JENKINS-44832
             connection.setServerHostKeyAlgorithms(preferredKeyAlgorithms);
         } else {
-            details.getListener().getLogger().println("Warning: no key algorithms provided; JENKINS-42959 disabled");
+            params.getListener().getLogger().println("Warning: no key algorithms provided; JENKINS-42959 disabled");
         }
         PluginImpl.register(connection);
         session = connection.openSession();
-        expandChannelBufferSize(session, details.getListener());
+        expandChannelBufferSize(session, params.getListener());
+    }
+
+    @Override
+    public int exec(String command, OutputStream output) throws IOException, InterruptedException {
+        return connection.exec(command, output);
     }
 
     @Override
     public void close() throws IOException {
+        boolean connectionLost = reportTransportLoss(connection, params.getListener());
         if (session != null) {
             // give the process 3 seconds to write out its dying message before we cut the loss
             // and give up on this process. if the slave process had JVM crash, OOME, or any other
             // critical problem, this will allow us to capture that.
             // exit code is also an useful info to figure out why the process has died.
             try {
-                details.getListener().getLogger().println(getSessionOutcomeMessage(session, connectionLost));
+                params.getListener().getLogger().println(getSessionOutcomeMessage(session, connectionLost));
                 session.getStdout().close();
                 session.close();
             } catch (Throwable t) {
-                t.printStackTrace(details.getListener().error(Messages.SSHLauncher_ErrorWhileClosingConnection()));
+                t.printStackTrace(params.getListener().error(Messages.SSHLauncher_ErrorWhileClosingConnection()));
             }
             session = null;
         }
-        boolean connectionLost = reportTransportLoss(connection, details.getListener());
 
-        Slave n = details.getSlave().getNode();
+        Slave n = params.getSlave().getNode();
         if (n != null && !connectionLost) {
-            String workingDirectory = getWorkingDirectory(n);
-            final String fileName = workingDirectory + "/slave.jar";
+            final String fileName = n.getRemoteFS().replaceFirst("/+$", "") + "/slave.jar"; // TODO get from SSHConnectionDetails
             Future<?> tidyUp = Computer.threadPoolForRemoting.submit(new Runnable() {
                 public void run() {
                     // this would fail if the connection is already lost, so we want to check that.
@@ -96,15 +101,15 @@ class BIOConnection implements SSHConnection {
                     } catch (Exception e) {
                         if (sftpClient == null) {// system without SFTP
                             try {
-                                connection.exec("rm " + fileName, details.getListener().getLogger());
+                                connection.exec("rm " + fileName, params.getListener().getLogger());
                             } catch (Error error) {
                                 throw error;
                             } catch (Throwable x) {
-                                x.printStackTrace(details.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
+                                x.printStackTrace(params.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
                                 // We ignore other Exception types
                             }
                         } else {
-                            e.printStackTrace(details.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
+                            e.printStackTrace(params.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
                         }
                     } finally {
                         if (sftpClient != null) {
@@ -116,15 +121,16 @@ class BIOConnection implements SSHConnection {
             try {
                 // the delete is best effort only and if it takes longer than 60 seconds - or the launch
                 // timeout (if specified) - then we should just give up and leave the file there.
+                Integer launchTimeoutSeconds = params.getLaunchTimeoutSeconds();
                 tidyUp.get(launchTimeoutSeconds == null ? 60 : launchTimeoutSeconds, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                e.printStackTrace(details.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
+                e.printStackTrace(params.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
                 // we should either re-apply our interrupt flag or propagate... we don't want to propagate, so...
                 Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
-                e.printStackTrace(details.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
+                e.printStackTrace(params.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
             } catch (TimeoutException e) {
-                e.printStackTrace(details.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
+                e.printStackTrace(params.getListener().error(Messages.SSHLauncher_ErrorDeletingFile(getTimestamp())));
             } finally {
                 if (!tidyUp.isDone()) {
                     tidyUp.cancel(true);

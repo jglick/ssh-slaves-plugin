@@ -26,7 +26,7 @@ package io.jenkins.plugins.ssh_launcher_bio;
 
 import hudson.Extension;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnection;
-import io.jenkins.plugins.ssh_launcher_api.SSHConnectionDetails;
+import io.jenkins.plugins.ssh_launcher_api.SSHConnectionParameters;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnectionFactory;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnectionFactoryDescriptor;
 import java.io.IOException;
@@ -38,8 +38,8 @@ public class BIOConnectionFactory implements SSHConnectionFactory {
     public BIOConnectionFactory() {}
 
     @Override
-    public SSHConnection connect(SSHConnectionDetails details) throws IOException, InterruptedException {
-        return new BIOConnection(details);
+    public SSHConnection connect(SSHConnectionParameters params) throws IOException, InterruptedException {
+        return new BIOConnection(params);
     }
 
     @Extension
