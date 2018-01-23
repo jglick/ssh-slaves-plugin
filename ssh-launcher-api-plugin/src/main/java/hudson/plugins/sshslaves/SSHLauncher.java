@@ -23,6 +23,7 @@
  */
 package hudson.plugins.sshslaves;
 
+import io.jenkins.plugins.ssh_launcher_api.JavaProvider;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHAuthenticator;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUser;
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
@@ -118,7 +119,10 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Functions;
 import static hudson.Util.*;
 import hudson.model.Computer;
+import hudson.model.JDK;
 import hudson.security.AccessControlled;
+import hudson.tools.ToolLocationNodeProperty;
+import hudson.tools.ToolLocationNodeProperty.ToolLocation;
 import hudson.util.VersionNumber;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnection;
 import io.jenkins.plugins.ssh_launcher_api.SSHConnectionParameters;
@@ -126,6 +130,7 @@ import io.jenkins.plugins.ssh_launcher_api.SSHConnectionFactory;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -918,20 +923,18 @@ public class SSHLauncher extends ComputerLauncher {
         }
 
         List<String> tried = new ArrayList<String>();
-        /* TODO port
         for (JavaProvider provider : JavaProvider.all()) {
-            for (String javaCommand : provider.getJavas(computer, listener, connection)) {
+            for (String javaCommand : provider.getJavas(computer, listener)) {
                 LOGGER.fine("Trying Java at "+javaCommand);
                 try {
                     tried.add(javaCommand);
                     return checkJavaVersion(listener, javaCommand);
                 } catch (IOException e) {
-                    LOGGER.log(FINE, "Failed to check the Java version",e);
+                    LOGGER.log(Level.FINE, "Failed to check the Java version",e);
                     // try the next one
                 }
             }
         }
-        */
 
         // attempt auto JDK installation
         try {
@@ -1060,10 +1063,12 @@ public class SSHLauncher extends ComputerLauncher {
         connection.exec("rm -rf "+javaDir,listener.getLogger());
         /* TODO port
         sftp.mkdirs(javaDir, 0755);
+        */
 
         URL bundle = getJDKInstaller().locate(listener, p, cpu);
 
         listener.getLogger().println("Installing " + JDKVERSION);
+        /* TODO port
         Util.copyStreamAndClose(bundle.openStream(),new BufferedOutputStream(sftp.writeToFile(bundleFile),32*1024));
         sftp.chmod(bundleFile,0755);
 
@@ -1275,7 +1280,7 @@ public class SSHLauncher extends ComputerLauncher {
                         getTimestamp(), javaCommand, versionStr));
 
                 // parse as a number and we should be OK as all we care about is up through the first dot.
-                final VersionNumber minJavaLevel = /* TODO port JavaProvider.getMinJavaLevel()*/null;
+                final VersionNumber minJavaLevel = JavaProvider.getMinJavaLevel();
                 try {
                     final Number version =
                         NumberFormat.getNumberInstance(Locale.US).parse(versionStr);
@@ -1593,11 +1598,10 @@ public class SSHLauncher extends ComputerLauncher {
 
     }
 
-    /* TODO port
     @Extension
     public static class DefaultJavaProvider extends JavaProvider {
         @Override
-        public List<String> getJavas(SlaveComputer computer, TaskListener listener, Connection connection) {
+        public List<String> getJavas(SlaveComputer computer, TaskListener listener) {
             List<String> javas = new ArrayList<String>(Arrays.asList(
                     "java",
                     "/usr/bin/java",
@@ -1632,7 +1636,6 @@ public class SSHLauncher extends ComputerLauncher {
             return javas;
         }
     }
-    */
 
     private static final Logger LOGGER = Logger.getLogger(SSHLauncher.class.getName());
 

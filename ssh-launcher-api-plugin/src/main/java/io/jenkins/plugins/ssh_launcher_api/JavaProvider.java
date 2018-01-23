@@ -21,25 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package hudson.plugins.sshslaves;
+package io.jenkins.plugins.ssh_launcher_api;
 
-import com.trilead.ssh2.Connection;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
 import hudson.slaves.SlaveComputer;
 import hudson.model.TaskListener;
 import hudson.util.VersionNumber;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import java.util.List;
-import java.util.Collections;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * Guess where Java is.
  */
+@Restricted(NoExternalUse.class) // https://github.com/jenkinsci/ssh-slaves-plugin/commit/a77153107b98f9e8c34ee814f97dec1e24d0f1e2 introduced; https://jenkins.io/doc/developer/extensions/ssh-slaves/#javaprovider never implemented elsewhere
 public abstract class JavaProvider implements ExtensionPoint {
     
     private static final VersionNumber JAVA_LEVEL_7 = new VersionNumber("7");
@@ -47,22 +46,12 @@ public abstract class JavaProvider implements ExtensionPoint {
     private static final VersionNumber JAVA_8_MINIMAL_SINCE = new VersionNumber("2.54");
     
     /**
-     * @deprecated
-     *      Override {@link #getJavas(SlaveComputer, TaskListener, Connection)} instead.
-     */
-    public List<String> getJavas(TaskListener listener, Connection connection) {
-        return Collections.emptyList();
-    }
-
-    /**
      * Returns the list of possible places where java executable might exist.
      *
      * @return
      *      Can be empty but never null. Absolute path to the possible locations of Java.
      */
-    public List<String> getJavas(SlaveComputer computer, TaskListener listener, Connection connection) {
-        return getJavas(listener,connection);
-    }
+    public abstract List<String> getJavas(SlaveComputer computer, TaskListener listener);
 
     /**
      * All regsitered instances.
@@ -76,12 +65,11 @@ public abstract class JavaProvider implements ExtensionPoint {
      * 
      * @return Minimal Java version required on the master and agent side.
      *         It will be {@link #JAVA_LEVEL_7} if the core version cannot be determined due to whatever reason.
-     * @since TODO
      * 
      */
     @Nonnull
     public static VersionNumber getMinJavaLevel() {
-        // TODO: Use reflection to utilize new core API once JENKINS-43500 is integrated
+        // TODO: Use reflection to utilize new core API once JENKINS-45842 is integrated
         // TODO: Get rid of it once Jenkins core requirement is bumped
         /*try {
             Method method = Jenkins.class.getMethod("getJavaMinLevel");

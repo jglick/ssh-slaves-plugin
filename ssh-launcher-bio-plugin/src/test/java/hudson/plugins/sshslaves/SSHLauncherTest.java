@@ -23,6 +23,7 @@
  */
 package hudson.plugins.sshslaves;
 
+import io.jenkins.plugins.ssh_launcher_api.JavaProvider;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.Fingerprint;
